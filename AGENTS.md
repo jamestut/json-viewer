@@ -15,6 +15,14 @@ python3 -m http.server 8080
 
 There are no build steps, no package.json, no npm. Just static files.
 
+## Testing
+
+Do NOT start an HTTP server to test changes — static file serving is guaranteed to work. Instead, run syntax checks:
+
+```bash
+node --check js/main.js js/parser.js js/jsonl-view.js js/search.js js/tree-view.js js/detail-view.js js/file-loader.js js/jsonc-parser.js
+```
+
 ## Architecture
 
 ```
@@ -24,8 +32,8 @@ json-viewer/
 └── js/
     ├── main.js         — Entry point (DOMContentLoaded). Initializes all modules, manages app state/mode, orchestrates view switching
     ├── file-loader.js  — File opening: File System Access API, drag-and-drop, hidden <input>, paste modal
-    ├── format-detector.js — Detects JSON vs JSONL vs JSONC from extension and content
-    ├── jsonc-parser.js — Strips // and /* */ comments from JSONC strings
+    ├── parser.js       — Combined format detection + parsing; returns { type, data } result objects (the only place JSON.parse is called)
+    ├── jsonc-parser.js — Strips // and /* */ comments from JSONC strings (used by parser.js as a fallback)
     ├── tree-view.js    — Builds node tree from parsed data, renders DOM, expand/collapse, selection, search integration
     ├── tree-nav.js     — Arrow key navigation within the JSON tree
     ├── jsonl-view.js   — Virtualized list for JSONL line entries; scroll-based rendering
@@ -73,21 +81,20 @@ The app has a `currentMode` state variable (in `main.js`) that determines behavi
 
 All colors use CSS custom properties. To add or modify a color, edit `styles.css` in both `:root` and `[data-theme="dark"]` blocks. The `data-theme` attribute is set on `<html>` by `theme.js`.
 
-## File Format Detection
+## File Format Detection & Parsing
 
-`format-detector.js` uses this logic:
-1. If filename has `.jsonl` or `.ndjson` extension → JSONL
-2. If filename has `.jsonc` extension → JSONC
-3. Otherwise, inspect content:
-   - Starts with `[` → JSON
-   - Starts with `{` and contains multiple top-level objects → JSONL
-   - Single valid JSON value → JSON
-   - Multiple lines each parseable as JSON → JSONL
-   - Otherwise → unknown
+All format detection and parsing happens in `parser.js` via a single `parseContent(text)` call. No file extension checks — detection is purely content-based using `JSON.parse`:
+
+1. **JSONL**: Try parsing each non-empty line individually. If all parse and there are 2+ results → JSONL. Short-circuits on first failure (so pretty-printed JSON is cheap — just 1 failed `JSON.parse`).
+2. **JSON**: Try parsing the whole text as a single JSON value. Covers objects, arrays, and primitives. A single-line JSONL file also falls here (better shown as a tree).
+3. **JSONC**: Strip comments via `jsonc-parser.js`, then parse as JSON. Only attempted after normal JSON fails.
+4. **Error**: Nothing worked → return error message for display.
+
+`JSON.parse` is not called anywhere else in the codebase. For JSONL, parsed data is stored as `{text, data}` pairs so line activation doesn't need re-parsing.
 
 ## Known Limitations
 
 - Tree view is not virtualized — very large JSON files (10MB+) may be slow
-- JSONC parser uses a hand-written state machine; doesn't handle trailing commas
+- JSONC comment stripper doesn't handle trailing commas
 - No resizable pane divider (panes are fixed 50/50 split)
 - Search in tree mode rebuilds the full DOM when expanding match paths

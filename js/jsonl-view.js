@@ -88,7 +88,7 @@ function renderVisibleLines() {
 
     const textEl = document.createElement('span');
     textEl.className = 'jsonl-line-text';
-    textEl.textContent = jsonlLines[i];
+    textEl.textContent = jsonlLines[i].text;
 
     row.appendChild(numEl);
     row.appendChild(textEl);
@@ -107,7 +107,7 @@ function renderVisibleLines() {
     row.addEventListener('dblclick', () => {
       selectedIndex = idx;
       highlightSelected();
-      if (onLineSelected) onLineSelected(jsonlLines[idx], idx);
+      if (onLineSelected) onLineSelected(jsonlLines[idx].data, idx);
     });
 
     listEl.appendChild(row);
@@ -152,7 +152,7 @@ export function jsonlNavigateDown() {
 
 export function jsonlActivateLine() {
   if (selectedIndex >= 0 && selectedIndex < jsonlLines.length && onLineSelected) {
-    onLineSelected(jsonlLines[selectedIndex], selectedIndex);
+    onLineSelected(jsonlLines[selectedIndex].data, selectedIndex);
   }
 }
 
@@ -181,7 +181,7 @@ export function searchJsonl(query) {
   const lowerQuery = query.toLowerCase();
   const matches = [];
   for (let i = 0; i < jsonlLines.length; i++) {
-    if (jsonlLines[i].toLowerCase().includes(lowerQuery)) {
+    if (jsonlLines[i].text.toLowerCase().includes(lowerQuery)) {
       matches.push(i);
     }
   }
@@ -212,7 +212,7 @@ export function clearJsonlSearchHighlights() {
 // --- Accessors used by other modules ---
 
 export function getJsonlLine(index) {
-  return jsonlLines[index];
+  return jsonlLines[index].text;
 }
 
 export function getJsonlCount() {

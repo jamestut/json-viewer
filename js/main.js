@@ -6,22 +6,15 @@
  * and orchestrates view switching between the welcome screen, JSON tree,
  * JSONL line list, and error display.
  *
- * Module initialization order:
- * 1. theme, detail-view, tree-view, tree-nav, jsonl-view, search
- * 2. file-loader (registers keyboard shortcuts and drag-drop)
- * 3. Button click handlers
- * 4. Global keydown handler for JSONL-specific navigation
- *
  * Event flow for file loading:
- *   file-loader → onFileLoaded/onTextLoaded → loadContent → detectFormat →
+ *   file-loader → onFileLoaded/onTextLoaded → loadContent → parseContent →
  *     → JSON/JSONC: showJsonView → renderTree
- *     → JSONL: loadJsonl → renderJsonlList
+ *     → JSONL: renderJsonlList
  */
 
 import { initTheme } from './theme.js';
 import { initFileLoader } from './file-loader.js';
-import { detectFormat } from './format-detector.js';
-import { parseJsonc } from './jsonc-parser.js';
+import { parseContent } from './parser.js';
 import { initTreeView, renderTree, expandAll, collapseAll, getNodePath } from './tree-view.js';
 import { initTreeNav } from './tree-nav.js';
 import { initJsonlView, renderJsonlList, jsonlNavigateUp, jsonlNavigateDown, jsonlActivateLine, setOnLineSelected } from './jsonl-view.js';
@@ -31,7 +24,7 @@ import { initSearch } from './search.js';
 /** Current app mode. One of: null, 'json', 'jsonc', 'jsonl-list', 'jsonl-detail' */
 let currentMode = null;
 
-/** Saved JSONL lines for restoring the list when returning from detail view */
+/** Saved JSONL lines ({text, data} pairs) for restoring the list when returning from detail view */
 let jsonlLinesBackup = [];
 
 function getMode() {
@@ -57,11 +50,11 @@ function init() {
   initSearch({ getMode });
 
   initFileLoader({
-    onFileLoaded: (text, filename) => {
-      loadContent(text, filename);
+    onFileLoaded: (text) => {
+      loadContent(text);
     },
     onTextLoaded: (text) => {
-      loadContent(text, null);
+      loadContent(text);
     },
   });
 
@@ -88,16 +81,9 @@ function init() {
 }
 
 /** Handle a JSONL line being activated (double-click or Enter/Space). */
-function handleJsonlLineSelected(lineText, index) {
-  try {
-    const data = JSON.parse(lineText);
-    currentMode = 'jsonl-detail';
-    showJsonView(data, true);
-  } catch {
-    // If the line isn't valid JSON, show the raw text as the tree
-    currentMode = 'jsonl-detail';
-    showJsonView(lineText, true);
-  }
+function handleJsonlLineSelected(data) {
+  currentMode = 'jsonl-detail';
+  showJsonView(data, true);
 }
 
 /**
@@ -141,52 +127,24 @@ function handleGlobalKeydown(e) {
 }
 
 /** Detect format, parse, and switch to the appropriate view. */
-function loadContent(text, filename) {
-  const format = detectFormat(text, filename);
+function loadContent(text) {
+  const result = parseContent(text);
 
-  if (format === 'jsonl') {
-    loadJsonl(text);
-  } else if (format === 'jsonc') {
-    try {
-      const data = parseJsonc(text);
-      currentMode = 'jsonc';
-      showJsonView(data, false);
-    } catch (err) {
-      showError('Failed to parse JSONC: ' + err.message);
-    }
-  } else if (format === 'json') {
-    try {
-      const data = JSON.parse(text);
-      currentMode = 'json';
-      showJsonView(data, false);
-    } catch (err) {
-      showError('Failed to parse JSON: ' + err.message);
-    }
+  if (result.type === 'jsonl') {
+    currentMode = 'jsonl-list';
+    jsonlLinesBackup = result.data;
+    hideAllViews();
+    document.getElementById('jsonl-view').classList.remove('hidden');
+    document.getElementById('back-jsonl-bar').classList.add('hidden');
+    setOnLineSelected(handleJsonlLineSelected);
+    renderJsonlList(result.data);
+    clearDetail();
+  } else if (result.type === 'json' || result.type === 'jsonc') {
+    currentMode = result.type;
+    showJsonView(result.data, false);
   } else {
-    // Last resort: try parsing as plain JSON
-    try {
-      const data = JSON.parse(text);
-      currentMode = 'json';
-      showJsonView(data, false);
-    } catch {
-      showError('Unable to detect file format or parse content as JSON.');
-    }
+    showError(result.message);
   }
-}
-
-/** Switch to JSONL list view. */
-function loadJsonl(text) {
-  currentMode = 'jsonl-list';
-  const lines = text.split('\n').filter(l => l.trim().length > 0);
-  jsonlLinesBackup = lines;
-
-  hideAllViews();
-  document.getElementById('jsonl-view').classList.remove('hidden');
-  document.getElementById('back-jsonl-bar').classList.add('hidden');
-
-  setOnLineSelected(handleJsonlLineSelected);
-  renderJsonlList(lines);
-  clearDetail();
 }
 
 /**
