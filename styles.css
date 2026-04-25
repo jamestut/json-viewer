@@ -1,0 +1,686 @@
+/*
+ * styles.css
+ *
+ * All styles for the JSON Viewer app. Uses CSS custom properties for theming:
+ *   :root          → light theme (default)
+ *   [data-theme="dark"] → dark theme
+ *
+ * The data-theme attribute is set on <html> by theme.js based on the
+ * prefers-color-scheme media query. No manual toggle.
+ *
+ * Layout overview:
+ *   #app (flex column, 100vh)
+ *     #toolbar (fixed height, flex-shrink: 0)
+ *     #back-jsonl-bar (conditional, fixed height)
+ *     #search-container (conditional, fixed height)
+ *     #content-area (flex: 1, position: relative)
+ *       .screen / .view (position: absolute, fill content-area)
+ */
+
+/* === Reset === */
+
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* === Theme variables: Light === */
+
+:root {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f5f5f7;
+  --bg-tertiary: #e8e8ed;
+  --bg-hover: #eaeaef;
+  --bg-selected: #dce4fd;
+  --bg-search-match: #fff3a8;
+  --text-primary: #1d1d1f;
+  --text-secondary: #6e6e73;
+  --text-muted: #aeaeb2;
+  --border-color: #d2d2d7;
+  --border-divider: #c8c8cd;
+  --btn-bg: #e8e8ed;
+  --btn-hover: #d8d8dd;
+  --btn-primary-bg: #0066dc;
+  --btn-primary-text: #ffffff;
+  --btn-primary-hover: #0055bb;
+  --scrollbar-thumb: #c1c1c6;
+  --drop-overlay-bg: rgba(0, 102, 220, 0.08);
+  --drop-border: #0066dc;
+  --modal-overlay: rgba(0, 0, 0, 0.4);
+  --modal-bg: #ffffff;
+  --tree-toggle-color: #6e6e73;
+  --tree-key-color: #9b2e2e;
+  --tree-string-color: #2e7d32;
+  --tree-number-color: #1565c0;
+  --tree-bool-color: #7b1fa2;
+  --tree-null-color: #6e6e73;
+  --tree-count-color: #6e6e73;
+  --value-string-color: #1d1d1f;
+  --jsonl-num-color: #aeaeb2;
+  --search-bar-bg: #ffffff;
+}
+
+/* === Theme variables: Dark === */
+
+[data-theme="dark"] {
+  --bg-primary: #1c1c1e;
+  --bg-secondary: #2c2c2e;
+  --bg-tertiary: #3a3a3c;
+  --bg-hover: #3a3a3c;
+  --bg-selected: #2a3a5c;
+  --bg-search-match: #5a4e00;
+  --text-primary: #f5f5f7;
+  --text-secondary: #a1a1a6;
+  --text-muted: #6e6e73;
+  --border-color: #3a3a3c;
+  --border-divider: #48484a;
+  --btn-bg: #3a3a3c;
+  --btn-hover: #48484a;
+  --btn-primary-bg: #0a84ff;
+  --btn-primary-text: #ffffff;
+  --btn-primary-hover: #409cff;
+  --scrollbar-thumb: #58585d;
+  --drop-overlay-bg: rgba(10, 132, 255, 0.1);
+  --drop-border: #0a84ff;
+  --modal-overlay: rgba(0, 0, 0, 0.6);
+  --modal-bg: #2c2c2e;
+  --tree-toggle-color: #a1a1a6;
+  --tree-key-color: #ff7b7b;
+  --tree-string-color: #66d96e;
+  --tree-number-color: #64b5f6;
+  --tree-bool-color: #ce93d8;
+  --tree-null-color: #a1a1a6;
+  --tree-count-color: #a1a1a6;
+  --value-string-color: #f5f5f7;
+  --jsonl-num-color: #6e6e73;
+  --search-bar-bg: #2c2c2e;
+}
+
+/* === Base === */
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-size: 13px;
+  color: var(--text-primary);
+  background: var(--bg-primary);
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* === Buttons === */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 10px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  background: var(--btn-bg);
+  color: var(--text-primary);
+  font-size: 12px;
+  cursor: pointer;
+  white-space: nowrap;
+  line-height: 1.4;
+}
+
+.btn:hover {
+  background: var(--btn-hover);
+}
+
+.btn:focus-visible {
+  outline: 2px solid var(--btn-primary-bg);
+  outline-offset: 1px;
+}
+
+.btn-primary {
+  background: var(--btn-primary-bg);
+  color: var(--btn-primary-text);
+  border-color: var(--btn-primary-bg);
+}
+
+.btn-primary:hover {
+  background: var(--btn-primary-hover);
+  border-color: var(--btn-primary-hover);
+}
+
+.btn-secondary {
+  background: var(--btn-bg);
+  color: var(--text-primary);
+}
+
+.btn-toolbar {
+  padding: 3px 8px;
+  font-size: 12px;
+}
+
+.btn-large {
+  padding: 8px 20px;
+  font-size: 14px;
+}
+
+.btn-small {
+  padding: 2px 6px;
+  font-size: 12px;
+  min-width: 24px;
+}
+
+kbd {
+  display: inline-block;
+  padding: 1px 5px;
+  border: 1px solid var(--border-color);
+  border-radius: 3px;
+  background: var(--bg-tertiary);
+  font-family: inherit;
+  font-size: 11px;
+}
+
+/* === App layout === */
+
+#app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+/* === Toolbar === */
+
+#toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 36px;
+  padding: 0 8px;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+  flex-shrink: 0;
+  gap: 8px;
+}
+
+.toolbar-left,
+.toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.toolbar-separator {
+  width: 1px;
+  height: 18px;
+  background: var(--border-divider);
+  margin: 0 4px;
+}
+
+/* Path breadcrumb shown in toolbar. Click copies path. */
+.detail-path {
+  color: var(--text-secondary);
+  font-family: "SF Mono", "Menlo", "Monaco", "Courier New", monospace;
+  font-size: 11px;
+  max-width: 300px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+
+.detail-path:hover {
+  background: var(--bg-hover);
+}
+
+/* === Back bar (shown when viewing a JSONL line in tree mode) === */
+
+#back-jsonl-bar {
+  display: flex;
+  align-items: center;
+  height: 32px;
+  padding: 0 8px;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+  flex-shrink: 0;
+}
+
+/* === Search bar === */
+
+#search-container {
+  display: none;
+  align-items: center;
+  height: 32px;
+  padding: 0 8px;
+  background: var(--search-bar-bg);
+  border-bottom: 1px solid var(--border-color);
+  flex-shrink: 0;
+  gap: 6px;
+}
+
+#search-container.visible {
+  display: flex;
+}
+
+#search-input {
+  flex: 1;
+  max-width: 300px;
+  padding: 3px 8px;
+  border: 1px solid var(--border-color);
+  border-radius: 3px;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-size: 12px;
+  outline: none;
+}
+
+#search-input:focus {
+  border-color: var(--btn-primary-bg);
+}
+
+#search-count {
+  font-size: 11px;
+  color: var(--text-secondary);
+  min-width: 60px;
+}
+
+/* === Drag-and-drop overlay === */
+
+#drop-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: var(--drop-overlay-bg);
+  border: 3px dashed var(--drop-border);
+  align-items: center;
+  justify-content: center;
+}
+
+#drop-overlay.visible {
+  display: flex;
+}
+
+.drop-message {
+  font-size: 18px;
+  color: var(--drop-border);
+  font-weight: 600;
+}
+
+/* === Paste text modal === */
+
+#paste-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 1001;
+  background: var(--modal-overlay);
+  align-items: center;
+  justify-content: center;
+}
+
+#paste-modal.visible {
+  display: flex;
+}
+
+.modal-content {
+  background: var(--modal-bg);
+  border-radius: 8px;
+  padding: 20px;
+  width: 90%;
+  max-width: 600px;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-content h3 {
+  margin-bottom: 12px;
+  font-size: 16px;
+}
+
+#paste-textarea {
+  flex: 1;
+  min-height: 200px;
+  padding: 10px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: "SF Mono", "Menlo", "Monaco", "Courier New", monospace;
+  font-size: 12px;
+  resize: vertical;
+  outline: none;
+}
+
+#paste-textarea:focus {
+  border-color: var(--btn-primary-bg);
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+/* === Content area (holds all switchable views) === */
+
+#content-area {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+
+/* === Welcome and error screens === */
+
+.screen {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.welcome-content,
+.error-content {
+  text-align: center;
+  padding: 40px;
+}
+
+.welcome-content h1 {
+  font-size: 28px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.welcome-content p {
+  color: var(--text-secondary);
+  margin-bottom: 24px;
+}
+
+.welcome-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.welcome-hint {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 24px;
+}
+
+.shortcuts-hint {
+  display: inline-grid;
+  grid-template-columns: auto auto;
+  gap: 6px 20px;
+  text-align: left;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.error-content h2 {
+  font-size: 20px;
+  margin-bottom: 12px;
+  color: #cc3333;
+}
+
+[data-theme="dark"] .error-content h2 {
+  color: #ff6b6b;
+}
+
+.error-content pre {
+  text-align: left;
+  max-width: 500px;
+  margin: 0 auto 20px;
+  padding: 12px;
+  background: var(--bg-secondary);
+  border-radius: 4px;
+  font-family: "SF Mono", "Menlo", "Monaco", "Courier New", monospace;
+  font-size: 12px;
+  overflow: auto;
+  max-height: 200px;
+}
+
+/* === Views (positioned absolutely within content-area) === */
+
+.view {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+/* 2-pane JSON tree view */
+#main-view {
+  display: flex;
+  flex-direction: row;
+}
+
+/* JSONL line list view */
+#jsonl-view {
+  display: flex;
+  flex-direction: column;
+}
+
+/* === Tree pane (left) and detail pane (right) === */
+
+.pane {
+  overflow: auto;
+}
+
+#tree-pane {
+  flex: 1;
+  min-width: 0;
+  background: var(--bg-primary);
+}
+
+#tree-container {
+  padding: 4px 0;
+  outline: none;
+}
+
+.pane-divider {
+  width: 1px;
+  background: var(--border-divider);
+  flex-shrink: 0;
+}
+
+#detail-pane {
+  flex: 1;
+  min-width: 0;
+  background: var(--bg-secondary);
+  display: flex;
+  flex-direction: column;
+}
+
+/* Readonly textarea for the detail view. Uses monospace font for code/data. */
+#detail-content {
+  flex: 1;
+  width: 100%;
+  padding: 12px;
+  border: none;
+  outline: none;
+  resize: none;
+  background: var(--bg-secondary);
+  color: var(--value-string-color);
+  font-family: "SF Mono", "Menlo", "Monaco", "Courier New", monospace;
+  font-size: 13px;
+  line-height: 1.5;
+  tab-size: 2;
+}
+
+#detail-content.no-wrap {
+  white-space: pre;
+  overflow-x: auto;
+}
+
+/* === Tree node styling === */
+
+.tree-node {
+  user-select: none;
+}
+
+.tree-row {
+  display: flex;
+  align-items: flex-start;
+  padding: 1px 8px 1px 0;
+  cursor: pointer;
+  line-height: 1.6;
+  min-height: 22px;
+}
+
+.tree-row:hover {
+  background: var(--bg-hover);
+}
+
+.tree-row.selected {
+  background: var(--bg-selected);
+}
+
+.tree-row.search-match {
+  background: var(--bg-search-match);
+}
+
+.tree-row.search-match.selected {
+  outline: 2px solid var(--btn-primary-bg);
+  outline-offset: -2px;
+}
+
+/* Expand/collapse arrow */
+.tree-toggle {
+  display: inline-block;
+  width: 16px;
+  text-align: center;
+  font-size: 10px;
+  color: var(--tree-toggle-color);
+  flex-shrink: 0;
+  line-height: 1.6;
+}
+
+.tree-toggle.leaf {
+  color: transparent;
+}
+
+/* Object key or array index */
+.tree-label {
+  color: var(--tree-key-color);
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+/* ": " separator between key and value */
+.tree-sep {
+  color: var(--text-secondary);
+  flex-shrink: 0;
+}
+
+/* Inline value preview (truncated) */
+.tree-value {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.tree-value-string {
+  color: var(--tree-string-color);
+}
+
+.tree-value-number {
+  color: var(--tree-number-color);
+}
+
+.tree-value-boolean {
+  color: var(--tree-bool-color);
+}
+
+.tree-value-null {
+  color: var(--tree-null-color);
+  font-style: italic;
+}
+
+/* "{} N items" / "[] N items" label on container nodes */
+.tree-count {
+  color: var(--tree-count-color);
+  font-size: 11px;
+  margin-left: 6px;
+  flex-shrink: 0;
+}
+
+/* === JSONL list === */
+
+#jsonl-container {
+  flex: 1;
+  overflow: auto;
+  position: relative;
+  background: var(--bg-primary);
+}
+
+#jsonl-list {
+  position: relative;
+}
+
+.jsonl-row {
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  font-family: "SF Mono", "Menlo", "Monaco", "Courier New", monospace;
+  font-size: 12px;
+  user-select: none; /* Prevent text selection on double-click */
+}
+
+.jsonl-row:hover {
+  background: var(--bg-hover);
+}
+
+.jsonl-row.selected {
+  background: var(--bg-selected);
+}
+
+.jsonl-row.search-match {
+  background: var(--bg-search-match);
+}
+
+.jsonl-row.search-match.selected {
+  outline: 2px solid var(--btn-primary-bg);
+  outline-offset: -2px;
+}
+
+.jsonl-line-num {
+  display: inline-block;
+  width: 50px;
+  text-align: right;
+  padding-right: 12px;
+  color: var(--jsonl-num-color);
+  flex-shrink: 0;
+  user-select: none;
+}
+
+.jsonl-line-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* === Scrollbar === */
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 4px;
+}

@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>JSON Viewer</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <input type="file" id="hidden-file-input" accept=".json,.jsonl,.jsonc,.ndjson" hidden>
+
+  <div id="drop-overlay">
+    <div class="drop-message">Drop JSON file here</div>
+  </div>
+
+  <div id="paste-modal">
+    <div class="modal-content">
+      <h3>Paste JSON Content</h3>
+      <textarea id="paste-textarea" rows="15" placeholder="Paste your JSON, JSONL, or JSONC content here..."></textarea>
+      <div class="modal-actions">
+        <button id="paste-cancel-btn" class="btn btn-secondary">Cancel</button>
+        <button id="paste-load-btn" class="btn btn-primary">Load</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="app">
+    <header id="toolbar">
+      <div class="toolbar-left">
+        <button id="btn-open" class="btn btn-toolbar">Open File</button>
+        <button id="btn-from-text" class="btn btn-toolbar">From Text</button>
+        <span class="toolbar-separator"></span>
+        <button id="btn-expand-all" class="btn btn-toolbar">Expand All</button>
+        <button id="btn-collapse-all" class="btn btn-toolbar">Collapse All</button>
+      </div>
+      <div class="toolbar-right">
+        <div id="detail-path" class="detail-path" title="Click to copy path">&mdash;</div>
+        <button id="btn-copy-detail" class="btn btn-toolbar">Copy</button>
+        <button id="btn-word-wrap" class="btn btn-toolbar">Wrap: On</button>
+      </div>
+    </header>
+
+    <div id="back-jsonl-bar" class="hidden">
+      <button id="btn-back-jsonl" class="btn btn-secondary">&#8592; Back to line list (Esc)</button>
+    </div>
+
+    <div id="search-container">
+      <input type="text" id="search-input" placeholder="Search...">
+      <span id="search-count"></span>
+      <button id="search-prev" class="btn btn-small" title="Previous match">&#9650;</button>
+      <button id="search-next" class="btn btn-small" title="Next match">&#9660;</button>
+      <button id="search-close" class="btn btn-small" title="Close search (Esc)">&#10005;</button>
+    </div>
+
+    <div id="content-area">
+      <div id="welcome-screen" class="screen">
+        <div class="welcome-content">
+          <h1>JSON Viewer</h1>
+          <p>Open a JSON, JSONL, or JSONC file to explore its contents.</p>
+          <div class="welcome-actions">
+            <button id="welcome-open" class="btn btn-primary btn-large">Open File</button>
+            <button id="welcome-paste" class="btn btn-secondary btn-large">Paste Text</button>
+          </div>
+          <p class="welcome-hint">Or drag and drop a file anywhere on this page.</p>
+          <div class="shortcuts-hint">
+            <div><kbd>Ctrl/Cmd+O</kbd> Open File</div>
+            <div><kbd>Ctrl/Cmd+N</kbd> Paste Text</div>
+            <div><kbd>Ctrl/Cmd+F</kbd> Search</div>
+            <div><kbd>&uarr;&darr;</kbd> Navigate &nbsp; <kbd>&larr;&rarr;</kbd> Collapse/Expand</div>
+          </div>
+        </div>
+      </div>
+
+      <div id="error-screen" class="screen hidden">
+        <div class="error-content">
+          <h2>Parse Error</h2>
+          <pre id="error-message"></pre>
+          <button id="error-retry" class="btn btn-primary">Try Another File</button>
+        </div>
+      </div>
+
+      <div id="main-view" class="view hidden">
+        <div id="tree-pane" class="pane">
+          <div id="tree-container" tabindex="0"></div>
+        </div>
+        <div class="pane-divider"></div>
+        <div id="detail-pane" class="pane">
+          <textarea id="detail-content" readonly></textarea>
+        </div>
+      </div>
+
+      <div id="jsonl-view" class="view hidden">
+        <div id="jsonl-container">
+          <div id="jsonl-list"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
