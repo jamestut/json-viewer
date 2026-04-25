@@ -12,7 +12,6 @@
  *     → JSONL: renderJsonlList
  */
 
-import { initTheme } from './theme.js';
 import { initFileLoader } from './file-loader.js';
 import { parseContent } from './parser.js';
 import { initTreeView, renderTree, expandAll, collapseAll, getNodePath } from './tree-view.js';
@@ -32,7 +31,6 @@ function getMode() {
 }
 
 function init() {
-  initTheme();
   initDetailView();
 
   initTreeView({

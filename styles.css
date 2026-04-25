@@ -2,11 +2,11 @@
  * styles.css
  *
  * All styles for the JSON Viewer app. Uses CSS custom properties for theming:
- *   :root          → light theme (default)
- *   [data-theme="dark"] → dark theme
+ *   :root                            → light theme (default)
+ *   @media (prefers-color-scheme: dark) → dark theme
  *
- * The data-theme attribute is set on <html> by theme.js based on the
- * prefers-color-scheme media query. No manual toggle.
+ * Theme switching is purely CSS-driven via the OS prefers-color-scheme
+ * media query. No manual toggle.
  *
  * Layout overview:
  *   #app (flex column, 100vh)
@@ -65,7 +65,8 @@
 
 /* === Theme variables: Dark === */
 
-[data-theme="dark"] {
+@media (prefers-color-scheme: dark) {
+  :root {
   --bg-primary: #1c1c1e;
   --bg-secondary: #2c2c2e;
   --bg-tertiary: #3a3a3c;
@@ -97,6 +98,7 @@
   --value-string-color: #f5f5f7;
   --jsonl-num-color: #6e6e73;
   --search-bar-bg: #2c2c2e;
+  }
 }
 
 /* === Base === */
@@ -430,8 +432,10 @@ kbd {
   color: #cc3333;
 }
 
-[data-theme="dark"] .error-content h2 {
-  color: #ff6b6b;
+@media (prefers-color-scheme: dark) {
+  .error-content h2 {
+    color: #ff6b6b;
+  }
 }
 
 .error-content pre {

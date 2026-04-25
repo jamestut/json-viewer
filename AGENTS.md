@@ -39,7 +39,6 @@ json-viewer/
     ├── jsonl-view.js   — Virtualized list for JSONL line entries; scroll-based rendering
     ├── detail-view.js  — Right pane: readonly textarea, word wrap toggle, copy, path breadcrumb
     ├── search.js       — Search UI and logic for both tree mode and JSONL list mode
-    ├── theme.js        — Listens to prefers-color-scheme media query, sets data-theme attribute
     └── platform.js     — isMac() helper for keyboard shortcut detection
 ```
 
@@ -59,7 +58,7 @@ The app has a `currentMode` state variable (in `main.js`) that determines behavi
 
 - **No framework**: Vanilla JS with ES modules (`<script type="module">`). All modern browsers support this.
 - **No animations**: Zero CSS transitions/animations per requirement.
-- **Theming**: CSS custom properties defined in `:root` (light) and `[data-theme="dark"]` (dark). Auto-switches via `prefers-color-scheme` media query.
+- **Theming**: CSS custom properties defined in `:root` (light) and `@media (prefers-color-scheme: dark)` (dark). Purely CSS-driven — no JS involved.
 - **Virtualized JSONL list**: Only visible rows (+ buffer) rendered. Top/bottom spacer divs handle total height for scrollbar accuracy.
 - **Tree rendering**: Full DOM rebuild on expand/collapse (not virtualized). Fine for typical JSON files. For very large files, this could be a perf concern.
 - **Detail pane as textarea**: Uses a readonly `<textarea>` so users get native text selection.
@@ -79,7 +78,7 @@ The app has a `currentMode` state variable (in `main.js`) that determines behavi
 
 ## CSS Theming
 
-All colors use CSS custom properties. To add or modify a color, edit `styles.css` in both `:root` and `[data-theme="dark"]` blocks. The `data-theme` attribute is set on `<html>` by `theme.js`.
+All colors use CSS custom properties. To add or modify a color, edit `styles.css` in both `:root` and `@media (prefers-color-scheme: dark)` blocks. Theme switching is purely CSS-driven — no JS involved.
 
 ## File Format Detection & Parsing
 
