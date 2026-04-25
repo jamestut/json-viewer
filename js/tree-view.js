@@ -70,7 +70,8 @@ export function renderTree(data) {
   expandedSet = new Set();
   currentSearchMatches = new Set();
 
-  const rootNode = buildNode('root', data, null, 0);
+  // add root node to allNodes
+  buildNode('root', data, null, 0);
   expandAllInternal();
 
   renderTreeInto(container);
