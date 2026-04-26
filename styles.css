@@ -526,6 +526,7 @@ kbd {
 /* === Tree node styling === */
 
 .tree-node {
+  -webkit-user-select: none;
   user-select: none;
 }
 
@@ -638,7 +639,8 @@ kbd {
   overflow: hidden;
   font-family: "SF Mono", "Menlo", "Monaco", "Courier New", monospace;
   font-size: 12px;
-  user-select: none; /* Prevent text selection on double-click */
+  -webkit-user-select: none; /* Prevent text selection on double-click */
+  user-select: none;
 }
 
 .jsonl-row:hover {
@@ -665,6 +667,7 @@ kbd {
   padding-right: 12px;
   color: var(--jsonl-num-color);
   flex-shrink: 0;
+  -webkit-user-select: none;
   user-select: none;
 }
 
