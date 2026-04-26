@@ -4,17 +4,6 @@
 
 A static web app for viewing JSON, JSONL, and JSONC files. No build tools, no dependencies. Served as plain HTML/CSS/JS with ES modules.
 
-## Running
-
-Serve the directory with any static HTTP server (needed for ES module imports):
-
-```bash
-python3 -m http.server 8080
-# Then open http://localhost:8080
-```
-
-There are no build steps, no package.json, no npm. Just static files.
-
 ## Testing
 
 Do NOT start an HTTP server to test changes — static file serving is guaranteed to work. Instead, run syntax checks:
