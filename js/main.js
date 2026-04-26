@@ -16,7 +16,7 @@ import { initFileLoader } from './file-loader.js';
 import { parseContent } from './parser.js';
 import { initTreeView, renderTree, expandAll, collapseAll, getNodePath } from './tree-view.js';
 import { initTreeNav } from './tree-nav.js';
-import { initJsonlView, renderJsonlList, jsonlNavigateUp, jsonlNavigateDown, jsonlActivateLine, setOnLineSelected } from './jsonl-view.js';
+import { initJsonlView, renderJsonlList, jsonlNavigateUp, jsonlNavigateDown, jsonlActivateLine, setOnLineSelected, setSelectedIndex } from './jsonl-view.js';
 import { initDetailView, showDetail, clearDetail } from './detail-view.js';
 import { initSearch } from './search.js';
 import { isMac } from './platform.js';
@@ -26,6 +26,9 @@ let currentMode = null;
 
 /** Saved JSONL lines ({text, data} pairs) for restoring the list when returning from detail view */
 let jsonlLinesBackup = [];
+
+/** Index of the last activated JSONL line, so we can restore selection on return */
+let lastJsonlSelectedIndex = 0;
 
 function getMode() {
   return currentMode;
@@ -88,7 +91,8 @@ function init() {
 }
 
 /** Handle a JSONL line being activated (double-click or Enter/Space). */
-function handleJsonlLineSelected(data) {
+function handleJsonlLineSelected(data, index) {
+  lastJsonlSelectedIndex = index;
   currentMode = 'jsonl-detail';
   showJsonView(data, true);
 }
@@ -180,6 +184,7 @@ function goBackToJsonlList() {
   document.getElementById('back-jsonl-bar').classList.add('hidden');
   setOnLineSelected(handleJsonlLineSelected);
   renderJsonlList(jsonlLinesBackup);
+  setSelectedIndex(lastJsonlSelectedIndex);
   clearDetail();
 }
 
