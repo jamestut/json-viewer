@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>JSON Viewer</title>
   <link rel="stylesheet" href="styles.css">
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#ffffff">
+  <meta name="theme-color" content="#1c1c1e" media="(prefers-color-scheme: dark)">
 </head>
 <body>
   <input type="file" id="hidden-file-input" accept=".json,.jsonl,.jsonc,.ndjson" hidden>
@@ -98,5 +101,8 @@
   </div>
 
   <script type="module" src="js/main.js"></script>
+  <script>
+    if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js");
+  </script>
 </body>
 </html>
