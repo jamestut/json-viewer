@@ -26,6 +26,8 @@ Serve the directory with any static HTTP server (needed for ES module imports). 
 
 | Shortcut | Action |
 |---|---|
+| Cmd/Ctrl+O | Open file dialog |
+| Cmd/Ctrl+Shift+O | Open paste text modal |
 | Cmd/Ctrl+F | Focus search bar (when data loaded) |
 | Escape | Close search/paste modal, or go back to JSONL lines |
 | Arrow Up/Down | Navigate tree nodes or JSONL lines |

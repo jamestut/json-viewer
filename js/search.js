@@ -38,7 +38,7 @@ export function initSearch({ getMode }) {
   // Global keyboard listener for Ctrl/Cmd+F and Escape
   document.addEventListener('keydown', (e) => {
     const mod = isMac() ? e.metaKey : e.ctrlKey;
-    if (mod && e.key === 'f') {
+    if (mod && e.code === 'KeyF') {
       e.preventDefault();
       searchContainer.classList.add('visible');
       searchInput.focus();

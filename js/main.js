@@ -19,6 +19,7 @@ import { initTreeNav } from './tree-nav.js';
 import { initJsonlView, renderJsonlList, jsonlNavigateUp, jsonlNavigateDown, jsonlActivateLine, setOnLineSelected } from './jsonl-view.js';
 import { initDetailView, showDetail, clearDetail } from './detail-view.js';
 import { initSearch } from './search.js';
+import { isMac } from './platform.js';
 
 /** Current app mode. One of: null, 'json', 'jsonc', 'jsonl-list', 'jsonl-detail' */
 let currentMode = null;
@@ -28,6 +29,13 @@ let jsonlLinesBackup = [];
 
 function getMode() {
   return currentMode;
+}
+
+function updateShortcutHints() {
+  const mod = isMac() ? 'Cmd' : 'Ctrl';
+  document.querySelectorAll('.shortcuts-hint kbd').forEach((kbd) => {
+    kbd.textContent = kbd.textContent.replace('Ctrl/Cmd', mod);
+  });
 }
 
 function init() {
@@ -75,6 +83,7 @@ function init() {
   // Global keydown for JSONL-specific keyboard handling
   document.addEventListener('keydown', handleGlobalKeydown);
 
+  updateShortcutHints();
   showWelcome();
 }
 

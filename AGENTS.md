@@ -57,7 +57,7 @@ The app has a `currentMode` state variable (in `main.js`) that determines behavi
 | Shortcut | Action | Works In |
 |---|---|---|
 | Cmd/Ctrl+O | Open file dialog | Any |
-| Cmd/Ctrl+N | Open paste text modal | Any |
+| Cmd/Ctrl+Shift+O | Open paste text modal | Any |
 | Cmd/Ctrl+F | Focus search bar | Any (when data loaded) |
 | Escape | Close search/paste modal, or go back from JSONL detail | Any |
 | Arrow Up/Down | Navigate tree nodes or JSONL lines | Tree / JSONL list |

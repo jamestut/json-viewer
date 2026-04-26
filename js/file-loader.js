@@ -5,11 +5,11 @@
  * - File System Access API (showOpenFilePicker) — primary, Chromium only
  * - Hidden <input type="file"> — universal fallback
  * - Drag-and-drop overlay — universal fallback
- * - Paste modal (Cmd/Ctrl+N) — for pasting raw text
+ * - Paste modal (Cmd/Ctrl+Shift+O) — for pasting raw text
  *
  * Keyboard shortcuts registered here:
  * - Cmd/Ctrl+O → open file dialog
- * - Cmd/Ctrl+N → open paste modal
+ * - Cmd/Ctrl+Shift+O → open paste modal
  * - Escape → close paste modal
  */
 
@@ -79,13 +79,12 @@ export function initFileLoader({ onFileLoaded, onTextLoaded }) {
       return;
     }
     const mod = isMac() ? e.metaKey : e.ctrlKey;
-    if (mod && e.key === 'o') {
-      e.preventDefault();
-      openBtn.click();
-    }
-    if (mod && e.key === 'n') {
+    if (mod && e.shiftKey && e.code === 'KeyO') {
       e.preventDefault();
       textBtn.click();
+    } else if (mod && !e.shiftKey && e.code === 'KeyO') {
+      e.preventDefault();
+      openBtn.click();
     }
   });
 
